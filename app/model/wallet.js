@@ -46,14 +46,12 @@ module.exports = app => {
    * @param number
    * @returns {Promise<TInstance[]>}
    */
-  Wallet.getUnallocatedWallet = async function (number, coinType) {
-    return await this.findAll({
+  Wallet.getUnallocatedWallet = async function (coinType) {
+    return await this.findOne({
       where: {
         status: 0,
         coinType,
       },
-      limit: parseInt(number),
-      attributes: ['wallet'],
       raw: true,
     });
   };

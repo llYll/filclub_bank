@@ -15,10 +15,10 @@ module.exports = appInfo => {
   config.RABBITMQ_CONFIG = {
     OPTIONS: {
       protocol: 'amqp',
-      hostname: '', // 连接地址
-      port: '',
-      username: '',
-      password: '',
+      hostname: '116.62.117.195', // 连接地址
+      port: '5672',
+      username: 'root',
+      password: 'kdv8XbhTKMQH2Na0dv8XbhTKMQH2',
     },
     EXCHANGE_NAME: 'recharge',
     EXCHANGE_TYPE: {
@@ -30,11 +30,11 @@ module.exports = appInfo => {
 
   config.sequelize = {
     dialect: 'mysql',
-    host: '',
-    port: '',
-    database: '',
-    username: '',
-    password: '',
+    host: '116.62.117.195',
+    port: '20005',
+    database: 'filclub_bank_test',
+    username: 'root',
+    password: 'kdv8XbhTKUUUMQH2Na0',
     timezone: '+08:00', // 时区 - 北京时间
     logging: false, // 在终端显示数据库操作
     define: {

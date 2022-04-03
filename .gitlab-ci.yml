@@ -1,0 +1,64 @@
+######dc-bank test 环境#######
+stages:
+  - build-test
+  - depoly-test
+  - build-prod
+  - depoly-prod
+
+build-test:
+  stage: build-test
+  tags:
+    - dc_bak_shell
+  script:
+    - git rev-parse HEAD > commit_id.txt
+    - export commit_id=`cat commit_id.txt`
+    - sudo docker build -t registry.cn-hangzhou.aliyuncs.com/diancun/dc_bank:test-$commit_id .
+  artifacts:
+    paths:
+      - commit_id.txt
+    when: on_success
+  only:
+    - test
+  
+depoly-test:
+  stage: depoly-test
+  tags:
+    - dc_bak_shell
+  script:
+    - sudo cp -fr commit_id.txt /opt/bin/dc_bank/docker
+    - cd /opt/bin/dc_bank/docker
+    - export commit_id=`cat commit_id.txt`
+    - cd ..
+    - sudo docker-compose down -v
+    - sudo sed -i "s/`cat docker-compose.yml |grep image|awk -F ":" '{print $3}'`/test-$commit_id/g" docker-compose.yml
+    - sudo docker-compose up -d
+    - sh feishu.sh
+  only:
+    - test
+
+######dc-counter prod 环境#######
+build-prod:
+  stage: build-prod
+  tags:
+    - dc_bank1_shell
+  script:
+    - sudo docker build -t registry.cn-hangzhou.aliyuncs.com/diancun/dc_bank:$CI_COMMIT_REF_NAME .
+  only:
+    - /^prod.*$/
+  except:
+    - branches
+
+depoly-prod:
+  stage: depoly-prod
+  tags:
+    - dc_bank1_shell
+  script:
+    - cd /opt/bin/dc_bank/
+    - sudo docker-compose down -v
+    - sudo sed -i "s/`cat docker-compose.yml |grep image|awk -F ":" '{print $3}'`/$CI_COMMIT_REF_NAME/g" docker-compose.yml
+    - sudo docker-compose up -d
+    - sudo sh /opt/bin/dc_bank/feishu.sh
+  only:
+    - /^prod.*$/
+  except:
+    - branches

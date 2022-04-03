@@ -1,6 +1,6 @@
 const Service = require('egg').Service;
 const { HttpJsonRpcConnector, JsonRpcProvider } = require('filecoin.js');
-
+const dayjs = require('dayjs');
 //定义 grpc参数
 let blockHeight;
 let httpConnector;
@@ -236,11 +236,12 @@ class LotusMonitorService extends Service {
         await this.ctx.service.amqp.send(application.name, {
           to: record[0].to,
           from: record[0].from,
-          blockCid: record[0].blockCid,
-          dealCid: record[0].dealCid,
-          value: record[0].value,
+          hash: record[0].dealCid,
+          amount: record[0].value,
           height: record[0].height,
-          coinType: 1,
+          type: 'fil',
+          chain: 'fil',
+          time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         });
         await this.ctx.model.Transaction.sendRecord(record[0].id);
         return record[0];

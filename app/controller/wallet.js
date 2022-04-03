@@ -10,7 +10,7 @@ class WalletController extends BaseController {
   async allocate() {
     const { config, ctx } = this;
     const { constant } = config;
-    const { number = 1000, app_key, app_secret, coin_type = 1 } = ctx.request.body;
+    const { number = 1000, app_key, app_secret } = ctx.request.body;
     const application = await ctx.model.Application.findApplication(app_key, app_secret);
     if (!application) {
       this.failed(
@@ -19,7 +19,7 @@ class WalletController extends BaseController {
       );
       return;
     }
-    const walletsAddress = await ctx.service.wallet.allocate(application, number, coin_type);
+    const walletsAddress = await ctx.service.wallet.allocate(application, number);
     this.success({ wallets: walletsAddress });
   }
 

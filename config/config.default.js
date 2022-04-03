@@ -38,8 +38,8 @@ module.exports = appInfo => {
     // url: 'http://115.236.22.225:11234/rpc/v0',
     // token:
     //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.8tbQ_oFneIcVAnDCFtNcp3YKclQQLIWMUhoEH5Kn9Nw',
-    url: 'http://115.236.46.99:1234/rpc/v0',
-    token:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.wII5xkO3e1y4oFQ6vUsouBAhDbdRo8biIDZ8VK5sECI',
+    url: 'http://183.178.171.225:31234/rpc/v0',
+    token:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.tiRtn55uHrrIpmYcasabNYsD13PxymB7djlvxdG5z_o',
   };
 
   config.security = {

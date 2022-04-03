@@ -1,0 +1,43 @@
+name: filclub_bank_test/.TENCETN_CLOUD_HOST
+on:
+  push:
+    branches:
+      - test
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 切换分支，获取源码
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: ssh deploy
+        uses: easingthemes/ssh-deploy@v2.1.4
+        env:
+          # Private Key  私钥
+          SSH_PRIVATE_KEY: ${{secrets.FILE_TEST}}
+          # Remote host   远程主机
+          REMOTE_HOST: '116.62.117.195'
+          # Remote user  远程主机登录用户
+          REMOTE_USER: 'root'
+          # Remote port  远程主机登录端口
+          #   REMOTE_PORT: 22
+          # optional, default is 22
+          # Source directory  源文件 目录
+          SOURCE: './*'
+          # optional, default is
+          ARGS: '-rltgoDzvO --delete'
+          # Target directory  目标目录
+          TARGET: '/opt/fileclub/bank_chongzhi/docker'
+
+      - name: docker build and docker run
+        uses: garygrossgarten/github-action-ssh@release
+        with:
+          command: cd /opt/fileclub/bank_chongzhi/ && docker-compose down -v && docker rmi -f filclub_bank:test && cd /opt/fileclub/bank_chongzhi/docker && ls -lrt && docker build -t  filclub_bank:test . && cd /opt/fileclub/bank_chongzhi && docker-compose up -d
+          host: '116.62.117.195'
+          username: 'root'
+          privateKey: ${{secrets.FILE_TEST}}
+
+    # optional, default is /home/REMOTE_USER
+    # Arguments to pass to rsync
+    #ARGS: # optional, default is -rltgoDzvO

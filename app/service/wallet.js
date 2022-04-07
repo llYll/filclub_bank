@@ -1,27 +1,15 @@
 const Service = require('egg').Service;
 
 class WalletService extends Service {
-  async allocate(application, number) {
+  async allocate(application, coinType) {
     let walletList = [];
-    const usdtErcWallet = await this.ctx.model.Wallet.getUnallocatedWallet(number, 1);
-    const usdtTrcWallet = await this.ctx.model.Wallet.getUnallocatedWallet(number, 2);
-    const filWallet = await this.ctx.model.Wallet.getUnallocatedWallet(number, 3);
-    if(usdtErcWallet){
-      walletList.push(usdtErcWallet);
+    const walletInfo = await this.ctx.model.Wallet.getUnallocatedWallet(coinType);
+    if(!walletInfo){
+      return '';
     }
-    if(usdtTrcWallet){
-      walletList.push(usdtTrcWallet);
-    }
-    if(filWallet){
-      walletList.push(filWallet);
-    }
+    walletList.push(walletInfo.wallet);
     await this.ctx.model.Wallet.allocatedWallet(application.id, walletList);
-
-    return {
-      usdtErcWallet,
-      usdtTrcWallet,
-      filWallet
-    };
+    return walletInfo.wallet;
   }
 }
 

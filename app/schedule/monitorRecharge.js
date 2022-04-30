@@ -15,7 +15,7 @@ class MonitorRecharge extends Subscription {
    * @returns {Promise<void>}
    */
   async subscribe(ctx) {
-    await this.ctx.service.lotusMonitor.rechargeMonitor();
+    // await this.ctx.service.lotusMonitor.rechargeMonitor();
   }
 }
 module.exports = MonitorRecharge;

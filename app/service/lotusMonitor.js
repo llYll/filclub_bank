@@ -49,6 +49,7 @@ class LotusMonitorService extends Service {
    * @returns {Promise<void>}
    */
   async rechargeMonitor(rank) {
+    const { ctx } = this;
     //获取上次监听的区块高度
     const heightInfo = await this.ctx.model.BlockHeight.getHeightInfo({
       id: rank,
@@ -80,7 +81,7 @@ class LotusMonitorService extends Service {
         const crtBlock = blockCids[i];
         const reason = await jsonRpcProvider.sync.checkBad(crtBlock); // 应该检查一个块是否被标记为 bad
         if (!reason) {
-          console.log(`${rank} 开始扫描区块信息`);
+          console.log(`${rank} 开始扫描block里面携带交易信息`);
 
           // 根据 blockCid 获取指定区块消息
           const blockMessages = await jsonRpcProvider.chain.getBlockMessages(crtBlock);
@@ -88,22 +89,26 @@ class LotusMonitorService extends Service {
 
           //查找BlsMessages地址
           for (const transaction of BlsMessages) {
-            const recharge = await this.recording(crtBlock, transaction, blockHeight, transaction.CID, rank);
-            // const minerRecord = await this.recordingMiner(crtBlock, transaction);
-            if (recharge) transactionCount++;
+            if(transaction.Method === 0 && ctx.helper.bigGt(transaction.Value, 0)) {
+              const recharge = await this.recording(crtBlock, transaction, blockHeight, transaction.CID, rank);
+              // const minerRecord = await this.recordingMiner(crtBlock, transaction);
+              if (recharge) transactionCount++;
+            }
           }
 
           //查找SecpkMessages地址
           for (let j = 0; j < SecpkMessages.length; j++) {
-            const recharge = await this.recording(
-              crtBlock,
-              SecpkMessages[j].Message,
-              blockHeight,
-              SecpkMessages[j].CID,
-              rank,
-            );
-            // const minerRecord = await this.recordingMiner(crtBlock, SecpkMessages[j].Message);
-            if (recharge) transactionCount++;
+            const message = SecpkMessages[j].Message;
+            if(message.Method === 0 && ctx.helper.bigGt(message.Value, 0)) {
+              const recharge = await this.recording(
+                crtBlock,
+                SecpkMessages[j].Message,
+                blockHeight,
+                SecpkMessages[j].CID,
+                rank,
+              );
+              if (recharge) transactionCount++;
+            }
           }
         } else {
           console.log("错误理由", reason);

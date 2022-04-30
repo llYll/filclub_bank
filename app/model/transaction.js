@@ -87,6 +87,12 @@ module.exports = app => {
       type: INTEGER.UNSIGNED,
       allowNull: false,
       comment: '区块高度',
+    },
+    rank: {
+      type: INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 1,
+      comment: '次数',
     }
   },{
     tableName: 'transaction'
@@ -134,5 +140,11 @@ module.exports = app => {
     return data;
   }
 
+  Transaction.updateRecord = async function(id, param) {
+    const data = await this.update(param,{
+      where: { id }
+    });
+    return data;
+  }
   return Transaction;
 };

@@ -9,9 +9,24 @@ module.exports = app => {
     // preload before app start
     await ctx.service.wallet.delRedisWallet();
     await ctx.service.wallet.initRedisWallet();
-    while (true) {
-      await ctx.service.lotusMonitor.rechargeMonitor();
-    }
+    process.nextTick(async ()=>{
+      while (true) {
+        try {
+          await ctx.service.lotusMonitor.rechargeMonitor(1);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    })
+    process.nextTick(async ()=>{
+      while (true) {
+        try {
+          await ctx.service.lotusMonitor.rechargeMonitor(2);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    })
   });
   // 关闭前执行
   app.beforeClose(async () => {

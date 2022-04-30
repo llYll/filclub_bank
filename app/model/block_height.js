@@ -20,8 +20,12 @@ module.exports = app => {
       },
       currentHeight: {
         type: STRING(255),
-        unique: true,
         comment: '当前检查到的区块高度',
+      },
+      behind: {
+        type: INTEGER(10),
+        defaultValue: 30,
+        comment: '落后高度',
       },
     },
     {
@@ -33,9 +37,12 @@ module.exports = app => {
    * 获取最新区块高度信息
    * @returns {Promise<TInstance>}
    */
-  BlockHight.getHeightInfo = async function () {
-    const res = await this.findAll();
-    return res[0];
+  BlockHight.getHeightInfo = async function (where, option) {
+    const res = await this.findOne({
+      where,
+      ...option,
+    });
+    return res;
   };
 
   /**

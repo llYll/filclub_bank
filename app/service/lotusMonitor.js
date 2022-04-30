@@ -2,11 +2,10 @@ const Service = require('egg').Service;
 const { HttpJsonRpcConnector, JsonRpcProvider } = require('filecoin.js');
 const dayjs = require('dayjs');
 //定义 grpc参数
-let blockHeight;
 let httpConnector;
 let jsonRpcProvider;
 
-function packageTransaction(crtBlock, message, dealcid) {
+function packageTransaction(crtBlock, message, dealcid, blockHeight) {
   const {
     Version,
     To,
@@ -52,7 +51,7 @@ class LotusMonitorService extends Service {
   async rechargeMonitor() {
     //获取上次监听的区块高度
     const heightInfo = await this.ctx.model.BlockHeight.getHeightInfo();
-    blockHeight = heightInfo.currentHeight;
+    const blockHeight = heightInfo.currentHeight;
     if (heightInfo.currentHeight > heightInfo.latestHeight - 30) {
       return;
     }
@@ -80,7 +79,7 @@ class LotusMonitorService extends Service {
 
           //查找BlsMessages地址
           for (const transaction of BlsMessages) {
-            const recharge = await this.recording(crtBlock, transaction, 0, transaction.CID);
+            const recharge = await this.recording(crtBlock, transaction, blockHeight, transaction.CID);
             // const minerRecord = await this.recordingMiner(crtBlock, transaction);
             if (recharge) transactionCount++;
           }
@@ -90,7 +89,7 @@ class LotusMonitorService extends Service {
             const recharge = await this.recording(
               crtBlock,
               SecpkMessages[j].Message,
-              0,
+              blockHeight,
               SecpkMessages[j].CID
             );
             // const minerRecord = await this.recordingMiner(crtBlock, SecpkMessages[j].Message);
@@ -102,8 +101,8 @@ class LotusMonitorService extends Service {
       }
       this.ctx.logger.info(`${blockHeight} 高度，成功监听到钱包充值交易 ${transactionCount} 笔`);
       console.log(`${blockHeight} 高度，成功监听到钱包充值交易 ${transactionCount} 笔`);
-      blockHeight++;
-      await this.ctx.model.BlockHeight.setCurrentHeight(heightInfo.id, blockHeight);
+      let nowheight = blockHeight + 1;
+      await this.ctx.model.BlockHeight.setCurrentHeight(heightInfo.id, nowheight);
     } catch (error) {
       console.log(error);
     }
@@ -202,7 +201,7 @@ class LotusMonitorService extends Service {
         httpConnector = new HttpJsonRpcConnector({ url, token });
         jsonRpcProvider = new JsonRpcProvider(httpConnector);
       }
-      let { param, values } = packageTransaction(crtBlock, message, dealCid);
+      let { param, values } = packageTransaction(crtBlock, message, dealCid, height);
       if (!values.to) return;
       if (values.method !== 0) return;
 
@@ -210,10 +209,10 @@ class LotusMonitorService extends Service {
       if (height > 0) {
         values.height = height;
       }
-      const wallet = await this.ctx.model.Wallet.findByWallet(values.to);
-      const constant = this.config.constant;
-
+      const wallet = await this.ctx.helper.getKey(`wallet:${values.to}`);
       if (!wallet) return;
+
+      const constant = this.config.constant;
 
       const  state = await jsonRpcProvider.state.searchMsg(dealCid);
       const code = state.Receipt.ExitCode;
@@ -232,7 +231,7 @@ class LotusMonitorService extends Service {
       //   return ;
       // }
       if (wallet) {
-        const application = await this.ctx.model.Application.findByPk(wallet.appId);
+        const application = await this.ctx.model.Application.findByPk(1);
         await this.ctx.service.amqp.send(application.name, {
           to: record[0].to,
           from: record[0].from,
@@ -258,7 +257,7 @@ class LotusMonitorService extends Service {
    * @param message
    * @returns {Promise<*>}
    */
-  async recordingMiner(crtBlock, message) {
+  async recordingMiner(crtBlock, message, height) {
     const { param, values } = packageTransaction(crtBlock, message);
 
     if (!values.to) return;

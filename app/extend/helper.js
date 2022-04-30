@@ -1,4 +1,5 @@
 const Bignumber = require('bignumber.js')
+const _ = require('lodash');
 
 module.exports = {
   unitAmount(number, decimal = 18) {
@@ -80,16 +81,44 @@ module.exports = {
     return res;
   },
 
-  async getRedis(key){
-    const res = await this.app.redis.get(key);
-    return JSON.parse(res);
+  /**
+   * 设置redis值
+   * @param {String} key
+   * @param {Object|String} value
+   * @param {Number} time 过期时间
+   * @return {}
+   */
+  async setKey(key, value, time) {
+    if (_.isObject(value)) {
+      value = JSON.stringify(value);
+    }
+    if (time) {
+      await this.app.redis.set(key, value, 'EX', time);
+    } else {
+      await this.app.redis.set(key, value);
+    }
   },
 
-  async setRedis(key,value,time = 60*5){
-    const res = JSON.stringify(value);
-    await this.app.redis.set(key,res,'EX',time);
-  },
+  /**
+   * 获取redis值
+   * @param {String} key
+   * @return {Promise<Object|String>}
+   */
+  async getKey(key) {
+    return new Promise(async (resolve, reject) => {
+      await this.app.redis.get(key, (err, result) => {
+        if (err) {
+          reject(err);
+        }
 
+        try {
+          resolve(JSON.parse(result));
+        } catch (e) {
+          resolve(result);
+        }
+      });
+    });
+  },
   async delRedis(key){
     await this.app.redis.del(key);
   }

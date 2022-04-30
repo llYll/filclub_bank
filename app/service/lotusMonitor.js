@@ -56,7 +56,6 @@ class LotusMonitorService extends Service {
     }, {
       raw: true,
     });
-    console.log(rank, heightInfo);
     const blockHeight = heightInfo.currentHeight;
     if (heightInfo.currentHeight > heightInfo.latestHeight - heightInfo.behind) {
       return;
@@ -75,7 +74,7 @@ class LotusMonitorService extends Service {
       const { Cids: blockCids } = tipSet;
 
       let transactionCount = 0;
-      console.log(blockHeight);
+      console.log(`第${rank}次 扫描高度${blockHeight}`);
       console.time(`第${rank}次区块遍历耗时`)
       for (let i = 0; i < blockCids.length; i++) {
         const crtBlock = blockCids[i];

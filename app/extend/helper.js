@@ -38,6 +38,15 @@ module.exports = {
     return res;
   },
 
+  bigGt(numberA, numberB) {
+    const a = new Bignumber(numberA);
+    const b = new Bignumber(numberB);
+    if (a.minus(b) > 0) {
+      return true;
+    }
+    return false;
+  },
+
   /**
    * @description 大数相减
    * @param {string|number} numberA

@@ -197,7 +197,7 @@ class LotusMonitorService extends Service {
     if (Array.isArray(state.ActiveSyncs)) {
       const { Height: latest_height } = state.ActiveSyncs[0];
       // 更新最新区块高度
-      await this.ctx.model.BlockHeight.setLatestHeight(heightInfo.id, latest_height);
+      await this.ctx.model.BlockHeight.setLatestHeight([1,2], latest_height);
       this.ctx.logger.info(`lotus 高度节点同步正常，已同步到 ${latest_height}`);
       console.log(`lotus 高度节点同步正常，已同步到 ${latest_height}`);
     }
